@@ -27,16 +27,39 @@ let World=(()=>{
         dimensions.zneg=-dimensions.halfmap;
         timer(_io,_interval);
     };
+    //---fog----------------------------------------------
     const fog=(_io)=>{_io.sockets.emit(iomsg.fog,{
-            color:'#'+Math.random().toString(16).substr(-6)
-            ,density:0.001*Math.random()
+            color:0x868293
+            ,density:0.0005
     });};
+    //---lights-------------------------------------------
     const lights=(_io)=>{_io.sockets.emit(iomsg.lights,[
-        {color:0xffffff,intensity:(Math.random()*0.3)+0.7,x:1,y:1,z:1}
-        ,{color:0xffffff,intensity:(Math.random()*0.3)+0.7,x:1,y:-1,z:-1}
-        ,{color:0xffffff,intensity:(Math.random()*0.3)+0.7,x:-1,y:1,z:1}
-        ,{color:0xffffff,intensity:(Math.random()*0.3)+0.7,x:-1,y:-1,z:-1}
+        {color:0xe8bdb0,intensity:1.5,x:2950,y:2625,z:-160}
+        ,{color:0xc3eaff,intensity:0.75,x:-1,y:-0.5,z:-1}
     ]);};
+    //---sky----------------------------------------------
+    const sky=(_io)=>{_io.sockets.emit(iomsg.sky,{
+        name:'sky1.jpg'
+        ,geo:{
+            radius:78192
+            ,widthSegments:16
+            ,heightSegments:16
+        }
+        ,y:20000
+    });};
+    //---water--------------------------------------------
+    const water=(_io)=>{_io.sockets.emit(iomsg.water,{
+        geo:{width:78192
+            ,height:78192
+            ,widthSegments:16
+            ,heightSegments:16}
+        ,mat:{color:0x006ba0
+            ,transparent:true
+            ,opacity:0.6}
+        ,y:-99
+        ,rotation:-0.5*Math.PI
+    });};
+    //---ground-------------------------------------------
     const ground=(_io)=>{_io.sockets.emit(iomsg.ground,{
             length:dimensions.mapsize
             ,width:dimensions.mapsize
@@ -44,39 +67,34 @@ let World=(()=>{
             ,x:0,y:0,z:0
             ,color:'#'+Math.random().toString(16).substr(-6)
     });};
-    const walls=(_io)=>{_io.sockets.emit(iomsg.walls,{
-        wall:{length:dimensions.mapsize,width:dimensions.wallheight,color:'#'+Math.random().toString(16).substr(-6)}
-        ,north:{x:0,y:dimensions.unitheight*1.5,z:-dimensions.halfmap,rotation:0}
-        ,south:{x:0,y:dimensions.unitheight*1.5,z:dimensions.halfmap,rotation:0}
-        ,east:{x:dimensions.halfmap,y:dimensions.unitheight*1.5,z:0,rotation:degreesToRadians(90)}
-        ,west:{x:-dimensions.halfmap,y:dimensions.unitheight*1.5,z:0,rotation:degreesToRadians(90)}
-    });};
-    const cubes=(_io)=>{
-        let objects=[],totalCubesWide=dimensions.mapsize/(dimensions.unitwidth*2);
-        for(let i=0;i<totalCubesWide;i++){
-            for(let j=0;j<totalCubesWide;j++){
-                if(Math.random()<0.8)continue;
-                objects.push({
-                    width:dimensions.unitwidth
-                    ,height:dimensions.unitwidth
-                    ,length:dimensions.unitwidth
-                    ,color:'#'+Math.random().toString(16).substr(-6)
-                    ,x:(dimensions.mapsize*Math.random())-(dimensions.mapsize*0.5)
-                    ,y:(dimensions.unitheight*0.5)+(Math.random()*100)
-                    ,z:(dimensions.mapsize*Math.random())-(dimensions.mapsize*0.5)
-                    ,rotation:degreesToRadians(Math.random()*360)
-                });
-        }}_io.sockets.emit(iomsg.objects,objects);
-    };
+    //---objects-------------------------------------------
+    // const cubes=(_io)=>{
+    //     let objects=[],totalCubesWide=dimensions.mapsize/(dimensions.unitwidth*2);
+    //     for(let i=0;i<totalCubesWide;i++){
+    //         for(let j=0;j<totalCubesWide;j++){
+    //             if(Math.random()<0.8)continue;
+    //             objects.push({
+    //                 width:dimensions.unitwidth
+    //                 ,height:dimensions.unitwidth
+    //                 ,length:dimensions.unitwidth
+    //                 ,color:'#'+Math.random().toString(16).substr(-6)
+    //                 ,x:(dimensions.mapsize*Math.random())-(dimensions.mapsize*0.5)
+    //                 ,y:(dimensions.unitheight*0.5)+(Math.random()*100)
+    //                 ,z:(dimensions.mapsize*Math.random())-(dimensions.mapsize*0.5)
+    //                 ,rotation:degreesToRadians(Math.random()*360)
+    //             });
+    //     }}_io.sockets.emit(iomsg.objects,objects);
+    // };
     const getDimensions=()=>dimensions;
     const degreesToRadians=(_degrees)=>_degrees*Math.PI/180;
     const timer=(_io,_interval=50/3)=>{
             setInterval(()=>{
                 fog(_io);
                 lights(_io);
-                walls(_io);
+                sky(_io);
+                water(_io);
                 ground(_io);
-                cubes(_io);
+                // cubes(_io);
             },_interval);
     };    
 return{init,timer,getDimensions};})();

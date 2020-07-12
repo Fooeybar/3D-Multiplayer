@@ -11,29 +11,11 @@ let Controls=function(Three,camera){
 	};
 	let PI_2=Math.PI*0.5;
 	let enabled=false;
-	let spheresyupper=new Three.Object3D();
-	let spheresylower=new Three.Object3D();
-	let spheresz=new Three.Object3D();
 	let pitchObject=new Three.Object3D();
 	pitchObject.add(camera);
 	this.yawObject=new Three.Object3D();
 	this.yawObject.position.y=10;
 	this.yawObject.add(pitchObject);
-	this.yawObject.set=(name)=>{
-		let bumper=[];
-		for(let i=0;i<10;i++){bumper.push(new Three.Object3D());bumper[i].name=name+'.b'+i;}
-		bumper[0].position.set(0,-7.5,-20);
-		bumper[1].position.set(0,-7.5,20);
-		bumper[2].position.set(-20,-7.5,0);
-		bumper[3].position.set(20,-7.5,0);
-		bumper[4].position.set(0,7.5,-20);
-		bumper[5].position.set(0,7.5,20);
-		bumper[6].position.set(-20,7.5,0);
-		bumper[7].position.set(20,7.5,0);
-		bumper[8].position.set(0,20,0);
-		bumper[9].position.set(0,-20,0);
-		bumper.forEach((i)=>{this.yawObject.add(i);});
-	}
 
 	document.onclick=function(){if(!enabled)container.requestPointerLock();}
 	document.addEventListener('pointerlockchange',()=>{

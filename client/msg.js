@@ -4,10 +4,11 @@ const iomsg={
     ,dcPlayer:'P-'
     ,players:'P'
     ,ground:'G'
-    ,walls:'W'
+    ,water:'W'
     ,objects:'O'
     ,models:'M'
     ,fog:'F'
+    ,sky:'S'
     ,lights:'L'
 };
 
