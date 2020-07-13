@@ -1,5 +1,4 @@
 import {iomsg,socketmsg} from './msg.js';
-import { ImprovedNoise } from './three.js-master/examples/jsm/math/ImprovedNoise.js'
 function Scene(_socket,Three,_controls){
     this.scene=new Three.Scene();
     this.scene.add(_controls);
@@ -47,12 +46,10 @@ function Scene(_socket,Three,_controls){
         let arr=list.split(',');
         for(let i=0;i<arr.length;i++){
             let player=new Three.Object3D();
-            let spheres=new Spheres(Three);
             player.name=arr[i];
             this.scene.add(player);
             players.push(player);
         }
-        console.log(players);
     });
     _socket.on(iomsg.dcPlayer,(list)=>{
         console.log(list+' left the game!');
@@ -106,55 +103,27 @@ function Scene(_socket,Three,_controls){
         this.water.rotation.x=_water.rotation;
         this.scene.add(this.water);
         _mat.transparent=false;
+        _mat.fog=true;
         let bottommat=new Three.MeshLambertMaterial(_mat);
         this.waterBottom=new Three.Mesh(watergeo,bottommat);
-        this.waterBottom.position.y=_water.y-200;
+        this.waterBottom.position.y=_water.y-_water.depth;
         this.waterBottom.rotation.x=_water.rotation;
         this.scene.add(this.waterBottom);
     });
     //---ground-------------------------------------------
-    this.ground;
     this.terrain;
-    _socket.on(iomsg.ground,(_ground)=>{
-        if(this.ground!==undefined){this.scene.remove(this.ground);this.ground===undefined;}
-        let groundGeo=new Three.PlaneGeometry(_ground.length*0.25,_ground.width*0.25);
-        let groundMat=new Three.MeshPhongMaterial({color:_ground.color,side:Three.DoubleSide,flatShading:true});
-        this.ground=new Three.Mesh(groundGeo,groundMat);
-        this.ground.position.set(_ground.x,575,_ground.z);
-        this.ground.rotation.x=_ground.rotation;
-        this.scene.add(this.ground);
-        
-
-    //clean up, move relevant stuff to server side
-        if(this.terrain!==undefined)return;
+    _socket.once(iomsg.ground,(_ground)=>{
         let worldWidth=1256,worldDepth=1256;
-        let data=generateHeight(worldWidth,worldDepth);
-        let geometry=new Three.PlaneBufferGeometry(78192,78192,worldWidth-1,worldDepth-1);
-        geometry.rotateX(-Math.PI*0.5);
-        let vertices=geometry.attributes.position.array;
-        for(let i=0,j=0,l=vertices.length;i<l;i++,j+=3)vertices[j+1]=data[i]*5;
-        new Three.TextureLoader().load('./models/images/sand1.jpg',(t1)=>{
+        let geometry=new Three.PlaneBufferGeometry(_ground.width,_ground.width,worldWidth-1,worldDepth-1);
+        geometry.rotateX(_ground.rotation);
+        for(let i=0,j=0,vertices=geometry.attributes.position.array;i<vertices.length;i++,j+=3)vertices[j+1]=_ground.data[i]*5;
+        new Three.TextureLoader().load('./models/images/'+_ground.basetexture,(t1)=>{
             t1.minFilter=Three.LinearFilter;
             this.terrain=new Three.Mesh(geometry,new Three.MeshBasicMaterial({map:t1,side:Three.DoubleSide,fog:false}));
-            this.terrain.position.y=-355;
+            this.terrain.position.y=_ground.y;
             this.scene.add(this.terrain);
         });
     });
-    function generateHeight(width,height){
-        let size=width*height,data=new Uint8Array(size),
-            perlin=new ImprovedNoise(),quality=1,z=Math.random()*17900;
-        for(let j=0;j<4;j++){
-            for(let i=0;i<size;i++){
-                let x=i%width,y=~~(i/width);
-                data[i]+=Math.abs(perlin.noise(x/quality,y/quality,z)*quality*3);
-            }
-            quality*=5;
-        }
-    return data;}
-
-
-
-
     //---objects-------------------------------------------
     // this.objects=[];
     // let deg90=45*Math.PI/180;

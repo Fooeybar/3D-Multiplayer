@@ -1,11 +1,8 @@
 let World=(()=>{
     let iomsg=require('./msg').iomsg;
     let dimensions={
-        mapsize:0
+        width:0
         ,halfmap:0
-        ,wallheight:0
-        ,unitwidth:0
-        ,unitheight:0
         ,xpos:0
         ,xneg:0
         ,ypos:0
@@ -13,12 +10,9 @@ let World=(()=>{
         ,zpos:0
         ,zneg:0
     };
-    const init=(_io,_interval=50/3,_mapSize=2400,_wallHeight=90,_unitWidth=90,_unitHeight=30)=>{
-        dimensions.mapsize=_mapSize;
-        dimensions.wallheight=_wallHeight;
-        dimensions.unitwidth=_unitWidth;
-        dimensions.unitheight=_unitHeight;
-        dimensions.halfmap=_mapSize*0.5;
+    const init=(_io,_interval=50/3,_width=78192)=>{
+        dimensions.width=_width;
+        dimensions.halfmap=_width*0.5;
         dimensions.xpos=dimensions.halfmap;
         dimensions.xneg=-dimensions.halfmap;
         dimensions.ypos=500;
@@ -41,7 +35,7 @@ let World=(()=>{
     const sky=(_io)=>{_io.sockets.emit(iomsg.sky,{
         name:'sky1.jpg'
         ,geo:{
-            radius:78192
+            radius:dimensions.width
             ,widthSegments:16
             ,heightSegments:16
         }
@@ -49,8 +43,8 @@ let World=(()=>{
     });};
     //---water--------------------------------------------
     const water=(_io)=>{_io.sockets.emit(iomsg.water,{
-        geo:{width:78192
-            ,height:78192
+        geo:{width:dimensions.width
+            ,height:dimensions.width
             ,widthSegments:16
             ,heightSegments:16}
         ,mat:{color:0x006ba0
@@ -58,15 +52,32 @@ let World=(()=>{
             ,opacity:0.6}
         ,y:-99
         ,rotation:-0.5*Math.PI
+        ,depth:200
     });};
     //---ground-------------------------------------------
     const ground=(_io)=>{_io.sockets.emit(iomsg.ground,{
-            length:dimensions.mapsize
-            ,width:dimensions.mapsize
-            ,rotation:degreesToRadians(90)
-            ,x:0,y:0,z:0
-            ,color:'#'+Math.random().toString(16).substr(-6)
+            width:dimensions.width
+            ,rotation:-Math.PI*0.5
+            ,y:-355
+            ,basetexture:'sand1.jpg'
+            ,data:getdata()
     });};
+    let _data;
+    function getdata(){
+        if(_data!==undefined)return _data;
+        const PNoise=require('./imports').ImprovedNoise;
+        let size=1256*1256,data=new Uint8Array(size),
+            perlin=PNoise(),quality=1,z=Math.random()*17900;
+        for(let j=0;j<4;j++){
+            for(let i=0;i<size;i++){
+                let x=i%1256,y=~~(i/1256);
+                data[i]+=Math.abs(perlin.noise(x/quality,y/quality,z)*quality*3);
+            }
+            quality*=5;
+        }
+        _data=new Uint8Array(size);
+        _data=data;
+    return data;}
     //---objects-------------------------------------------
     // const cubes=(_io)=>{
     //     let objects=[],totalCubesWide=dimensions.mapsize/(dimensions.unitwidth*2);
