@@ -8,15 +8,15 @@ let Controls=function(Three,camera){
 			,shift:{toggle:false,value:false,id:16}
 			,space:{toggle:false,value:false,id:32}
 			,caps:{toggle:true,value:false,id:20}
-	};
-	let PI_2=Math.PI*0.5;
-	let enabled=false;
-	let pitchObject=new Three.Object3D();
+		}
+		,PI_2=Math.PI*0.5
+		,enabled=false
+		,pitchObject=new Three.Object3D();
 	pitchObject.add(camera);
 	this.yawObject=new Three.Object3D();
 	this.yawObject.position.y=10;
 	this.yawObject.add(pitchObject);
-
+	//-----------------------------------------------------
 	document.onclick=function(){if(!enabled)container.requestPointerLock();}
 	document.addEventListener('pointerlockchange',()=>{
 		if(document.pointerLockElement===container){enabled=true;document.getElementById('escape').style.display='none';}
@@ -29,12 +29,11 @@ let Controls=function(Three,camera){
 		this.yawObject.rotation.y-=movementX*0.002;
 		pitchObject.rotation.x-=movementY*0.002;
 		pitchObject.rotation.x=Math.max(-PI_2,Math.min(PI_2,pitchObject.rotation.x));
-		//maybe emit bumpers here, so potential move is already pre-approved
+		//maybe emit here, so potential move is already pre-approved
 		//server would have to handle a lot of incoming however
 		//or could setinterval
 	},false);
-	document.addEventListener('keydown',(event)=>{
-		if(!enabled)return;
+	document.addEventListener('keydown',(event)=>{if(!enabled)return;
 		if(event.keyCode===16)if(keys.shift.toggle&&keys.shift.value)keys.shift.value=false;else keys.shift.value=true;
 		if(event.keyCode===20)if(keys.caps.toggle&&keys.caps.value)keys.caps.value=false;else keys.caps.value=true;
 		if(event.keyCode===32)if(keys.space.toggle&&keys.space.value)keys.space.value=false;else keys.space.value=true;
@@ -43,8 +42,7 @@ let Controls=function(Three,camera){
 		if(event.keyCode===83)if(keys.s.toggle&&keys.s.value)keys.s.value=false;else keys.s.value=true;
 		if(event.keyCode===87)if(keys.w.toggle&&keys.w.value)keys.w.value=false;else keys.w.value=true;
 	},false);
-	document.addEventListener('keyup',(event)=>{
-		if(!enabled)return;
+	document.addEventListener('keyup',(event)=>{if(!enabled)return;
 		if(event.keyCode===16)if(!keys.shift.toggle)keys.shift.value=false;
 		if(event.keyCode===20)if(!keys.caps.toggle)keys.caps.value=false;
 		if(event.keyCode===32)if(!keys.space.toggle)keys.space.value=false;
@@ -53,11 +51,11 @@ let Controls=function(Three,camera){
 		if(event.keyCode===83)if(!keys.s.toggle)keys.s.value=false;
 		if(event.keyCode===87)if(!keys.w.toggle)keys.w.value=false;
 	},false);
-
+	//-----------------------------------------------------
 	//{xp:bool,xn:bool,yp:bool,yn:bool,zp:bool,zn:bool,rotation}
-	let clock=new Three.Clock();
-	let _delta;
-	let facing={x:0,y:0,z:0};
+	let clock=new Three.Clock()
+		,_delta
+		,facing={x:0,y:0,z:0};
 	this.move=()=>{
 		_delta=clock.getDelta();	
 		facing.x-=facing.x*5.0*_delta;
@@ -71,12 +69,11 @@ let Controls=function(Three,camera){
 		if(keys.s.value)facing.z+=speed;
 		if(keys.a.value)facing.x-=speed;
 		if(keys.d.value)facing.x+=speed;
-
+		//movement applied
 		this.yawObject.translateX(facing.x*_delta);
 		this.yawObject.translateY(facing.y*_delta);
 		this.yawObject.translateZ(facing.z*_delta);
 	};
-
+	//-----------------------------------------------------
 };
-
 export default Controls;

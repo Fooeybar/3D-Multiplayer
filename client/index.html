@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html lang='en'>
   <head>
-	  <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" type="image/ico" href="models/images/favicon.ico"/>
     <title>A Fooey Game!</title>
     <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
     <script src="/socket.io/socket.io.js"></script>
   </head>
   <body id='body'>
     <div id='container'></div>
-    <div id='react-root'></div>
-    <div id='escape'><div id='instructions'>Click to play! Look with cursor, move with WASD/Space/Shift, sprint with CapsLock</div></div>
+    <div id='escape'>
+      <div id='instructions'>
+        Click to play!
+        <br><br><br><br><br>
+        Look with cursor
+        <br><br>
+        Move with WASD/Space/Shift
+        <br><br>
+        Sprint with CapsLock
+      </div></div>
   </body>
   <script type='module' src='index.js'></script>
 </html>

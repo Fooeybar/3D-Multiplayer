@@ -1,3 +1,3 @@
 'use strict';
 //start everything
-const Playerserver=require('./server/server');
+const Server=require('./server/server');

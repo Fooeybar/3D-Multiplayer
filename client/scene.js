@@ -3,32 +3,31 @@ function Scene(_socket,Three,_controls){
     this.scene=new Three.Scene();
     this.scene.add(_controls);
     //---close-connection---------------------------------
-    let exit=true;
-    let closeConn=()=>{
-        if(!exit)return;
+    function closeConn(){
+        if(!closeConn.exit)return;
         _socket.emit(socketmsg.dc);
         _socket.close();
-        exit=false;
+        closeConn.exit=false;
     }
-    let msg=true;
-    window.addEventListener('pagehide',()=>{closeConn();if(msg){console.log('You\'ve left the game!');msg=false;}});
-    window.onunload=()=>{closeConn();if(msg){console.log('You\'ve left the game!');msg=false;}};
-    window.onbeforeunload=()=>{closeConn();};
-    window.unload=()=>{closeConn();};
-    //---me------------------------------------------------
+    window.addEventListener('pagehide',closeConn());
+    window.onunload=()=>closeConn();
+    window.onbeforeunload=()=>closeConn();
+    window.unload=()=>closeConn();
+    //---me-----------------------------------------------
     let me={};
     _socket.emit(socketmsg.newPlayer);
     _socket.once(socketmsg.newPlayerRet,(player)=>{
         me=player;
-        console.log('My name is '+me.name+'!');
+        console.log('Your name is '+me.name+'!');
     });
-    //---players-------------------------------------------
+    //---players------------------------------------------
+    //probably too slow
     let players=[];
-    _socket.on(iomsg.players,(_players)=>{//place players on scene ================------------------------================--------------=====-------===---------
+    _socket.on(iomsg.players,(_players)=>{
         for(let i=0;i<_players.length;i++){
             let player=this.scene.getObjectByName(_players[i].name);
             if(player===undefined){
-                player=new Three.Object3D();
+                player=new Three.Object3D();//needs model loader here
                 player.name=_players[i].name;
                 this.scene.add(player);
                 players.push(player);
@@ -38,6 +37,7 @@ function Scene(_socket,Three,_controls){
             player.rotation.y=_players[i].rotation;
         }
     });
+    //---newplayer----------------------------------------
     _socket.on(iomsg.newPlayer,(list)=>{
         if(list===me.name)return;
         if(list.includes(me.name))list=list.replace(' '+me.name+',','');
@@ -51,6 +51,7 @@ function Scene(_socket,Three,_controls){
             players.push(player);
         }
     });
+    //---dcplayer-----------------------------------------
     _socket.on(iomsg.dcPlayer,(list)=>{
         console.log(list+' left the game!');
         list.replace(' ');
@@ -141,9 +142,6 @@ function Scene(_socket,Three,_controls){
     //         this.scene.add(cube);
     //     }
     // });
-    //---models-------------------------------------------
-    // this.models;
-    // _socket.on('iomsg.models',(_models)=>{});
     //----------------------------------------------------
 return this.scene;}
 export default Scene;
